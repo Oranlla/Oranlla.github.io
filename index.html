@@ -40,11 +40,11 @@
 
         <!-- 底部互動區 (如按鈕) -->
         <footer class="mt-8 text-center">
-            <button onclick="showMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <button onclick="showMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" class="track-btn" data-key="clicknothing">
                 click for nothing
             </button>
             <p id="message-area" class="mt-4 text-sm text-green-600 font-medium hidden">
-                ✅ It worked and wasted you about 1 second.
+                ✅ It worked and wasted you about <span><strong id="count-clicknothing">0</strong></span> second.
             </p>
         </footer>
 
@@ -60,6 +60,48 @@
                 messageArea.classList.add('hidden');
             }, 3000);
         }
+
+                // 設定儲存在瀏覽器 localStorage 中的資料鍵名
+          const STORAGE_KEY = 'buttonClickCounts';
+        
+          // 從瀏覽器讀取先前儲存的點擊紀錄；若無紀錄則建立空物件 {}
+          const counts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        
+          // 更新畫面上的各別點擊次數與總點擊次數
+          function updateDisplay() {
+            let total = 0;
+        
+            // 找出所有帶有 track-btn 類別的按鈕並逐一更新顯示
+            document.querySelectorAll('.track-btn').forEach(btn => {
+              const key = btn.dataset.key;       // 取得按鈕的 data-key 名稱
+              const count = counts[key] || 0;    // 取得該按鈕的次數，若無紀錄則為 0
+              total += count;                    // 累加至總點擊次數
+        
+              // 找到對應的顯示元素並更新數字
+              const countEl = document.getElementById(`count-${key}`);
+              if (countEl) countEl.textContent = count;
+            });
+        
+            // 更新畫面上的總點擊次數
+            const totalEl = document.getElementById('total-count');
+            if (totalEl) totalEl.textContent = total;
+          }
+        
+          // 為每個帶有 track-btn 類別的按鈕綁定點擊事件
+          document.querySelectorAll('.track-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const key = btn.dataset.key;
+              // 將該按鈕的點擊次數加 1
+              counts[key] = (counts[key] || 0) + 1;
+              // 將更新後的紀錄轉成 JSON 字串並存回瀏覽器 localStorage
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
+              // 重新整理畫面數字
+              updateDisplay();
+            });
+          });
+        
+          // 頁面載入完成時，先執行一次以顯示瀏覽器中已儲存的紀錄
+          updateDisplay();
     </script>
 </body>
 </html>
